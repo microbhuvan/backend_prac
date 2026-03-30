@@ -23,7 +23,7 @@ const secret = process.env.JWTsecretKey;
             {id},
             secret,
             {expiresIn: "7d"}
- c       );
+        );
     }
 
     function verifyToken(token){
@@ -33,6 +33,6 @@ const secret = process.env.JWTsecretKey;
         );
     }
 
-return { genTokens, genAccessToken, genRefreshToken, verifyToken };
+module.export =  { genTokens, genAccessToken, genRefreshToken, verifyToken };
 
 
