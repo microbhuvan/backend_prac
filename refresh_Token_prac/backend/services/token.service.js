@@ -1,5 +1,5 @@
+//resources folder
 //TokenService.js
-const express = require("express");
 const jwt = require("jsonwebtoken");
 const secret = process.env.JWTsecretKey;
 
@@ -18,7 +18,7 @@ const secret = process.env.JWTsecretKey;
         );
     }
 
-    function genRefreshToken(){
+    function genRefreshToken(id){
         return jwt.sign(
             {id},
             secret,
@@ -33,6 +33,6 @@ const secret = process.env.JWTsecretKey;
         );
     }
 
-module.export =  { genTokens, genAccessToken, genRefreshToken, verifyToken };
+module.exports =  { genTokens, genAccessToken, genRefreshToken, verifyToken };
 
 
