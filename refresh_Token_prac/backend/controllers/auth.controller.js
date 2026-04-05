@@ -2,7 +2,6 @@
 //signUp.js
 const express = require("express");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const { genTokens, genAccessToken, verifyToken } = require("../services/token.service");
 const User = require("../models/User");
 
@@ -52,13 +51,13 @@ const signUp =  async(req, res)=>{
 
 const refresh = async(req, res)=>{
     try{
-        const refreshToken = req.cookies.refreshToken;
+        const incomingRefreshToken = req.cookies.refreshToken;
 
-    if(!refreshToken){
+    if(!incomingRefreshToken){
         return res.status(401).json({message: "refreshToken not found"})
     }
 
-    const { id } = verifyToken(refreshToken);
+    const { id } = verifyToken(incomingRefreshToken);
 
     const user = await User.findById(id);
 
@@ -66,18 +65,32 @@ const refresh = async(req, res)=>{
         return res.status(404).json({message: "user not found"});
     }
 
-    if(user.refreshToken !== refreshToken){
+    const isMatch = await bcrypt.compare(incomingRefreshToken, user.refreshToken)
+
+    if(!isMatch){
         return res.status(403).json({message: "invalid token"})
     }
 
-    const accessToken = genAccessToken(user._id);
+    const { accessToken, refreshToken } = genTokens(user._id);
 
-    return res.status(200).cookie("accessToken", accessToken, {
+    const hashedToken = await bcrypt.hash(refreshToken, 10);
+    user.refreshToken = hashedToken;
+    user.save();
+
+    return res.status(200)
+    .cookie("accessToken", accessToken, {
         httpOnly: true,
         secure: false,
         sameSite: "Strict",
         maxAge: 15 * 60 * 1000
-    }).json({message: "token refreshed"})
+    })
+    .cookie("refreshToken", newRefreshToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "Strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000
+    })
+    .json({message: "token refreshed"})
     }
     catch(err){
         return res.status(500).json({message: "server error"})
