@@ -1,0 +1,73 @@
+const express = require("express");
+const session = require("express-session");
+
+const app = express();
+const PORT = 3000;
+
+app.use(express.json());
+
+/*
+========================
+SESSION (BASIC)
+========================
+*/
+app.use(session({
+  secret: "mysecret",
+  resave: false,
+  saveUninitialized: false,
+
+}));
+
+/*
+========================
+LOGIN
+========================
+*/
+app.post("/login", (req, res) => {
+  const { email } = req.body;
+
+  // 🔥 THIS IS THE ONLY IMPORTANT LINE
+  req.session.user = { email };
+
+  res.send("Logged in");
+});
+
+/*
+========================
+PROFILE
+========================
+*/
+app.get("/profile", (req, res) => {
+  if (!req.session.user) {
+    return res.send("Not logged in");
+  }
+
+  res.send(`Hello ${req.session.user.email}`);
+});
+
+/*
+========================
+LOGOUT
+========================
+*/
+app.post("/logout", (req, res) => {
+  req.session.destroy(() => {
+    res.send("Logged out");
+  });
+});
+
+app.listen(PORT, () => {
+  console.log("Server running");
+});
+
+
+
+const redisClient = createClient({
+  url: "redis://localhost:6379"
+});
+
+redisClient.connect().catch(console.error);
+
+
+app.use(session({
+  store: new RedisStore({ client: redisClient }),

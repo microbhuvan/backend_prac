@@ -1,33 +1,42 @@
 const express = require("express");
 const session = require("express-session");
-const { getConnection, connectDB } = require("./config/db");
-const session_secret = process.env.session_secret;
-const PORT = 3000 || process.env.PORT;
 
 const app = express();
-
 
 app.use(express.json());
 
 app.use(session({
-    secret: session_secret,
-    resave: false,
-    saveUninitialized: false,
+    secret: "mysecret", //used to sign cookie
+    resave: false, //dont save again if nothing is saved
+    saveUninitialized: false, //dont create session until i store somethihng
+    store:MongoStore.create({
+        mongoUrl: "mongodb://127/0.0.1:27017/session_prac"
+    }),
+}));
 
-    store: getConnection(),
+app.post("/login", (req, res)=>{
+    const {email} = req.body;
 
-    cookie: {
-        httpOnly: true,
-        sameSite: "lax"
+    req.session.user = {email};
+
+    res.send("logged in");
+})
+
+app.get("/profile",(req, res)=>{
+    if(!req.session.user){
+        return res.send("not logged in");
     }
-}))
 
-connectDB().
-then(()=>{
-        app.listen(PORT, ()=>{
-        console.log("sever started")
+    res.send(`hello ${req.session.user.email}`);
+});
+
+
+app.post("/logout", (req, res)=>{
+    req.session.destroy(()=>{
+        res.send("logged out")
     })
 })
-.catch((err)=>{
-    console.error("db connection error ",err);
+
+app.listen(3000, ()=>{
+    console.log("server running")
 })
