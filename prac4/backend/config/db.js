@@ -1,3 +1,5 @@
+//backend/config/db.js
+
 const mongoose = require("mongoose");
 const mongourl = process.env.mongoURL;
 

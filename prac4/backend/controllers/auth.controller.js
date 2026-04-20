@@ -1,9 +1,11 @@
+// backend/controllers/auth.controller.js
+
 const User = require("../models/user.js")
 const bcrypt = require("bcryptjs");
 const {generateTokens} = require("../services/TokenService.js")
 
 const signUp = async(req, res)=>{
-    console.log("working")
+    console.log("working in signup")
     try{
         const { username, email, password } = req.body;
 
@@ -23,12 +25,15 @@ const signUp = async(req, res)=>{
 
     const { accessToken, refreshToken } = generateTokens(user._id);
 
-    return res.status(200)
+    user.refreshToken = await bcrypt.hash(refreshToken, 10);
+    await user.save();
+
+    return res
     .cookie("accessToken", accessToken, {
         httpOnly: true,
         secure: false,
         //sameSite: "Strict",
-        maxAge: 15 * 60 * 1000,
+        maxAge: 1 * 60 * 1000,
     })
     .cookie("refreshToken", refreshToken, {
         httpOnly: true,
@@ -36,17 +41,23 @@ const signUp = async(req, res)=>{
         //sameSite: "Strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
     })
-    .json({message: "user signed up"})
+    .redirect("/dashboard");
+
+
     }
     catch(err){
         console.log(err);
-        return res.status(500).json({message: "server error"})
+        //return res.status(500).json({message: "server error"})
+        res.redirect("/signup")
     }
+
+    
 }
 
 
 const logIn = async(req, res)=>{
     try{
+        console.log("inside login")
         const {email, password} = req.body;
 
     const user = await User.findOne({email});
@@ -61,6 +72,13 @@ const logIn = async(req, res)=>{
     }
 
     const { accessToken, refreshToken } = generateTokens(user.id);
+
+    user.refreshToken = await bcrypt.hash(refreshToken, 10);
+    await user.save();
+
+    console.log(user);
+    console.log(accessToken)
+    console.log(refreshToken)
     
     return res.status(200)
     .cookie("accessToken", accessToken, {
@@ -73,14 +91,20 @@ const logIn = async(req, res)=>{
         secure: false,
         maxAge: 7 * 24 * 60 * 60 * 1000
     })
-    .json({message: "user successfully logged in"})
+    .redirect("/dashboard");
 
     }
     catch(err){
         console.log(err);
-        return res.status(500).json({message: "server error"});
+        //return res.status(500).json({message: "server error"});
+        res.redirect("/login");
     }
 
 }
 
-module.exports = { signUp, logIn }
+const refresh = async(req, res)=>{
+    
+    
+}
+
+module.exports = { signUp, logIn, refresh }

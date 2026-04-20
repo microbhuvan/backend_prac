@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <script>
+        const api = axios.create({
+            baseURL: "http://localhost:5000"
+        })
+
+        api.interceptor.response.use(
+            (response) => response,
+            async(error) => {
+                const originalRequest = error.config;
+                if(error.response.status === 401 && !originalRequest._retry){
+                    originalRequest._retry = true;
+
+                    try{
+                        await api.get("/auth/refresh")
+
+                        return api(originalRequest)
+                    }
+                    catch(err){
+                        console.log("refresh Failed")
+                    }
+                }
+                return Promise.reject(error);
+            }
+        )
+    </script>
+</body>
+</html>

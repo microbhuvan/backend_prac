@@ -1,3 +1,5 @@
+// backend/services/TokenService.js
+
 const jwt = require("jsonwebtoken");
 const jwtSecret = process.env.JWT_SECRET_KEY;
 
@@ -5,7 +7,7 @@ function generateAccessToken(id){
     return jwt.sign(
         {id},
         jwtSecret,
-        {expiresIn: "15m"}
+        {expiresIn: "1m"}
     )
 }
 
@@ -26,7 +28,7 @@ function generateTokens(id){
 function verifyToken(token){
     return jwt.verify(
         token,
-        secret
+        jwtSecret
     )
 }
 
