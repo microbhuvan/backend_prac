@@ -11,11 +11,16 @@ api.interceptors.response.use(
     async(error)=>{
         const originalRequest = error.config;
         console.log(error);
+
+if (originalRequest.url.includes("/auth/refresh") || originalRequest.url.includes("/auth/me")) {
+      return Promise.reject(error);
+    }
+
         if(!originalRequest._retry && error.response?.status === 401){
             originalRequest._retry = true;
 
             try{
-                await api.post("/auth/retry")
+                await api.post("/auth/refresh")
                 console.log(originalRequest)
                 return api(originalRequest);
             }

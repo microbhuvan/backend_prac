@@ -5,7 +5,7 @@ const authMiddleware = async(req, res, next)=>{
     try{
         const accessToken = req.cookies.accessToken;
         if(!accessToken){
-            return res.status(400).json({ message: "token missing"});
+            return res.status(401).json({ message: "token missing"});
         }
 
         const decoded = jwt.verify(accessToken, jwt_secret);
@@ -15,7 +15,7 @@ const authMiddleware = async(req, res, next)=>{
     }
     catch(err){
         console.log(err.message);
-        return res.status(500).json({ message: "server error" });
+        return res.status(401).json({ message: "invalid or expired token" });
     }
 }
 
