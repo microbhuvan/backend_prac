@@ -1,10 +1,10 @@
 const { signUp, logIn, refresh, logout, getInfo } = require("../controllers/auth.controllers")
 const authRouter = require("express").Router();
 const authMiddleware = require("../middlewares/auth.middleware")
-const { loginLimiter } = require("../middlewares/ratelimiter");
+const rateLimiter = require("../middlewares/ratelimiter")
 
 authRouter.post("/signup", signUp);
-authRouter.post("/login", loginLimiter, logIn);
+authRouter.post("/login", rateLimiter("login"), logIn);
 authRouter.post("/refresh", refresh);
 authRouter.post("/logout", logout);
 
