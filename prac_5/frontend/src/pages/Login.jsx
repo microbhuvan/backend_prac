@@ -54,15 +54,15 @@ function Login() {
 
       
         const retryAfter =
-          err.response?.headers["retry-after"] ||
-          err.response?.data?.retryAfter;
+          err.response?.headers["retry-after"] || //value we will get in form of string for this for this
+          err.response?.data?.retryAfter; 
 
         const waitTime = retryAfter
-          ? parseInt(retryAfter, 10)
+          ? parseInt(retryAfter, 10) //we will convert string to decimal(10) number
           : 60;
 
         setTimeLeft(waitTime);
-        setError(`Too many attempts. Try again in ${waitTime}s`);
+        setError(`Too many attempts. Try again in ${timeLeft}s`);
       } else if (err.response?.status === 401) {
         setError("Invalid email or password");
       } else {

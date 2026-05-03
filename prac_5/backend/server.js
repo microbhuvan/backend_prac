@@ -7,6 +7,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const authRouter = require("./routes/auth.routes");
 const PORT = process.env.PORT || 3001;
+const userRouter = require("./routes/user.routes");
 
 app.use(express.json());
 app.use(cookieParser());
@@ -19,6 +20,7 @@ app.get("/", (req, res)=>{
     return res.status(200).json({message: "app working"});
 })
 app.use("/auth", authRouter);
+app.use("/user", userRouter);
 
 
 connectDB()
