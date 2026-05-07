@@ -11,7 +11,10 @@ wss.on("connection", (socket)=>{  //socket a private indivisual tunnel
     socket.send("welcome to the server");
 
     socket.on("message", (message)=>{
-        console.log("received", message.toString());
+        //console.log("received", message.toString());
+
+        const parsedMessage = JSON.parse(message.toString());
+        console.log(parsedMessage);
 
         wss.clients.forEach((client) =>{  //wss.clients contains all connected sockets
             if(client.readyState === WebSocket.OPEN){

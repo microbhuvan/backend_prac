@@ -36,7 +36,17 @@
         function sendMessage(){
 
             const input = document.getElementById("messageInput");
-            socket.send(input.value);
+            //socket.send(input.value);
+
+            const message = {
+                event: "CHAT_MESSAGE",
+                data: {
+                    text:input.value,
+                }
+            }
+
+            socket.send(JSON.stringify(message));
+
             input.value="";
         }
 
