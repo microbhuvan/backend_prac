@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Chat</title>
+</head>
+<body>
+
+    <h1>Room Chat</h1>
+
+    <input id="roomInput" placeholder="Enter room name" />
+    <button onclick="joinRoom()">Join Room</button>
+
+    <br><br>
+
+    <input id="messageInput" placeholder="Type message" />
+    <button onclick="sendMessage()">Send</button>
+
+    <ul id="messages"></ul>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+    <script>
+
+        const socket = io("http://localhost:3000");
+
+        let currentRoom = "";
+
+        socket.on("connect", () => {
+            console.log("Connected:", socket.id);
+        });
+
+        // JOIN SUCCESS
+        socket.on("JOIN_SUCCESS", (data) => {
+
+            console.log(`Joined room: ${data.roomId}`);
+
+        });
+
+        // RECEIVE CHAT MESSAGE
+        socket.on("CHAT_MESSAGE", (data) => {
+
+            console.log(data);
+
+            const li = document.createElement("li");
+
+            li.textContent = `${data.sender}: ${data.text}`;
+
+            document.getElementById("messages").appendChild(li);
+
+        });
+
+        // JOIN ROOM
+        function joinRoom() {
+
+            const roomInput = document.getElementById("roomInput");
+
+            currentRoom = roomInput.value;
+
+            socket.emit("JOIN_ROOM", currentRoom);
+
+        }
+
+        // SEND MESSAGE
+        function sendMessage() {
+
+            const messageInput = document.getElementById("messageInput");
+
+            socket.emit("CHAT_MESSAGE", {
+                roomId: currentRoom,
+                text: messageInput.value
+            });
+
+            messageInput.value = "";
+
+        }
+
+    </script>
+
+</body>
+</html>
