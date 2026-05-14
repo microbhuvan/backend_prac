@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input id="userInput" placeholder="Enter username" />
+    <button onclick="goOnline()">Go Online</button>
+
+    <h2>Online Users</h2>
+
+    <ul id="onlineUsers"></ul>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+
+        const socket = io("http://localhost:3000");
+
+        socket.on("connect", ()=>{
+            console.log("connected: ",socket.id);
+        })
+
+        socket.on("ONLINE_USERS", (users)=>{
+
+            const ul = document.getElementById("onlineUsers");
+            ul.innerHTML = "";
+
+            users.forEach((user)=>{
+                const li = document.createElement("li");
+                li.textContent = user;
+                ul.appendChild(li);
+            })
+
+        })
+
+        function goOnline() {
+
+            const username =
+                document.getElementById("userInput").value;
+
+            socket.emit("USER_ONLINE", username);
+
+        }
+
+    </script>
+</body>
+</html>

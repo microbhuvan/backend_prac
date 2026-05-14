@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Typing Indicator</title>
+</head>
+<body>
+
+    <input id="roomInput" placeholder="Room" />
+    <button onclick="joinRoom()">Join</button>
+
+    <br><br>
+
+    <input id="usernameInput" placeholder="Username" />
+
+    <br><br>
+
+    <input id="messageInput" placeholder="Type message..." />
+
+    <p id="typingStatus"></p>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+    <script>
+
+        const socket = io("http://localhost:3000");
+
+        let currentRoom = "";
+        let typingTimeout;
+
+        // JOIN ROOM
+        function joinRoom() {
+
+            currentRoom =
+                document.getElementById("roomInput").value;
+
+            socket.emit("JOIN_ROOM", currentRoom);
+
+        }
+
+        const messageInput =
+            document.getElementById("messageInput");
+
+        // DETECT TYPING
+        messageInput.addEventListener("input", () => {
+
+            const username =
+                document.getElementById("usernameInput").value;
+
+            // USER_TYPING EVENT
+            socket.emit("USER_TYPING", {
+                roomId: currentRoom,
+                username
+            });
+
+            // Clear previous timeout
+            clearTimeout(typingTimeout);
+
+            // STOP_TYPING after 2 sec
+            typingTimeout = setTimeout(() => {
+
+                socket.emit("STOP_TYPING", {
+                    roomId: currentRoom
+                });
+
+            }, 2000);
+
+        });
+
+        // SHOW TYPING
+        socket.on("USER_TYPING", (data) => {
+
+            document.getElementById("typingStatus")
+                .textContent =
+                `${data.username} is typing...`;
+
+        });
+
+        // REMOVE TYPING
+        socket.on("STOP_TYPING", () => {
+
+            document.getElementById("typingStatus")
+                .textContent = "";
+
+        });
+
+    </script>
+
+</body>
+</html>
